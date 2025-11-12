@@ -16,6 +16,8 @@ export class RoleCategoryService {
   ): Promise<RoleCategoryDto> {
     const roleCategory = new this.roleCategoryModel({
       name: roleCategoryDto.name,
+      lastUpdatedBy: 'SYSTEM', //TODO switch to current user when auth service is implemented
+      createdBy: 'SYSTEM',
     });
 
     return await roleCategory.save();

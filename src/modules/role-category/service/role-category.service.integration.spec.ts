@@ -1,16 +1,11 @@
 import { Connection, Model } from 'mongoose';
 import {
-  closeTestDatabase,
-  createTestDatabase,
+  cleanUpTest,
+  configureTest,
+  TestConfig,
   TestDatabaseInstance,
 } from '../../../../test-utils/database.helper';
 import { RoleCategoryService } from './role-category.service';
-import { Test, TestingModule } from '@nestjs/testing';
-import {
-  getConnectionToken,
-  getModelToken,
-  MongooseModule,
-} from '@nestjs/mongoose';
 import {
   RoleCategory,
   RoleCategorySchema,
@@ -24,46 +19,43 @@ describe('Role Category Service', () => {
   let roleCategoryModel: Model<RoleCategory>;
 
   beforeEach(async () => {
-    dbInstance = await createTestDatabase();
+    const testConfig: TestConfig<RoleCategoryService, RoleCategory> =
+      await configureTest(
+        [{ name: RoleCategory.name, schema: RoleCategorySchema }],
+        RoleCategoryService,
+        RoleCategory.name,
+      );
 
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        MongooseModule.forRoot(dbInstance.uri), // ✅ Direct usage
-        MongooseModule.forFeature([
-          { name: RoleCategory.name, schema: RoleCategorySchema },
-        ]),
-      ],
-      providers: [RoleCategoryService],
-    }).compile();
-
-    service = module.get<RoleCategoryService>(RoleCategoryService);
-    mongoConnection = module.get<Connection>(getConnectionToken());
-    roleCategoryModel = module.get<Model<RoleCategory>>(
-      getModelToken(RoleCategory.name),
-    );
+    service = testConfig.service;
+    dbInstance = testConfig.dbInstance;
+    mongoConnection = testConfig.mongoConnection;
+    roleCategoryModel = testConfig.model;
   });
 
-  afterAll(async () => {
-    if (mongoConnection) {
-      await mongoConnection.close();
-    }
-    await closeTestDatabase(dbInstance);
-  });
+  afterAll(async () => cleanUpTest(mongoConnection, dbInstance));
 
   it('should save role category', async () => {
     const dto = new RoleCategoryDto('test');
-    const result = service.addRoleCategory(dto);
+    const result = await service.addRoleCategory(dto);
 
-    await result.then((it) => expect(it.name).toEqual('test'));
+    expect(result.name).toEqual('test');
 
-    const persisted = await roleCategoryModel.find({ name: 'test' });
+    const persisted = await roleCategoryModel.find();
     expect(persisted.length).toEqual(1);
     expect(persisted[0].name).toEqual('test');
   });
 
   it('should find all categories', async () => {
-    const categoryA = new roleCategoryModel({ name: 'categoryA' });
-    const categoryB = new roleCategoryModel({ name: 'categoryB' });
+    const categoryA = new roleCategoryModel({
+      name: 'categoryA',
+      createdBy: 'SYSTEM',
+      lastUpdatedBy: 'SYSTEM',
+    });
+    const categoryB = new roleCategoryModel({
+      name: 'categoryB',
+      createdBy: 'SYSTEM',
+      lastUpdatedBy: 'SYSTEM',
+    });
 
     await roleCategoryModel.bulkSave([categoryA, categoryB]);
 
