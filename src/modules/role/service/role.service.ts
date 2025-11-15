@@ -17,7 +17,7 @@ export class RoleService {
     private roleCategoryModel: Model<RoleCategory>,
   ) {}
 
-  async addRole(roleDto: RoleDto): Promise<RoleDto> {
+  async addRole(roleDto: RoleDto): Promise<Role> {
     const categoryName = roleDto.roleCategory.name;
     let roleCategory: RoleCategory;
     try {
@@ -32,7 +32,7 @@ export class RoleService {
     }
     const role = new this.roleModel({
       name: roleDto.name,
-      roleCategory,
+      roleCategoryId: roleCategory._id,
       lastUpdatedBy: 'SYSTEM', //TODO switch to current user when auth service is implemented
       createdBy: 'SYSTEM',
     });
@@ -49,10 +49,10 @@ export class RoleService {
       return [];
     }
 
-    const roles = await this.roleModel
-      .find({ roleCategory: category._id })
-      .populate('roleCategory');
+    const roles = await this.roleModel.find({ roleCategoryId: category._id });
 
-    return roles.map((it) => it.toDto());
+    return roles.map(
+      (it) => new RoleDto(it.name, new RoleCategoryDto(categoryName)),
+    );
   }
 }

@@ -50,7 +50,7 @@ describe('Role E2E test', () => {
 
     const addedRole = addRoleResponse.body as Role;
     expect(addedRole.name).toEqual('test role');
-    expect(addedRole.roleCategory.name).toEqual('test category');
+    expect(addedRole.roleCategoryId).toBeDefined();
 
     const getRoleResponse = await request(app.getHttpServer())
       .get('/role?categoryName=test%20category')
