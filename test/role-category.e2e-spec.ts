@@ -26,7 +26,7 @@ describe('Role Category E2E test', () => {
   afterEach(async () => cleanupTestData(mongoConnection));
 
   it('should add a role category', async () => {
-    const dto = new RoleCategoryDto('test');
+    const dto: RoleCategoryDto = { name: 'test' };
 
     const response = await request(app.getHttpServer())
       .post('/role-category')
@@ -37,8 +37,8 @@ describe('Role Category E2E test', () => {
   });
 
   it('should find all categories', async () => {
-    const dto1 = new RoleCategoryDto('test1');
-    const dto2 = new RoleCategoryDto('test2');
+    const dto1: RoleCategoryDto = { name: 'test1' };
+    const dto2: RoleCategoryDto = { name: 'test2' };
 
     for (const dto of [dto1, dto2]) {
       await request(app.getHttpServer())

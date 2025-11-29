@@ -39,7 +39,7 @@ describe('Role Category Service', () => {
   afterAll(async () => closeAndStopDatabase(mongoConnection, dbInstance));
 
   it('should save role category', async () => {
-    const dto = new RoleCategoryDto('test');
+    const dto: RoleCategoryDto = { name: 'test' };
     const result = await service.addRoleCategory(dto);
 
     expect(result.name).toEqual('test');
@@ -71,7 +71,7 @@ describe('Role Category Service', () => {
   });
 
   it('should throw not found exception when no such category', async () => {
-    const dto = new RoleCategoryDto('test');
+    const dto: RoleCategoryDto = { name: 'test' };
     await service.addRoleCategory(dto);
 
     await expect(service.findByName('nonexistent')).rejects.toThrow(

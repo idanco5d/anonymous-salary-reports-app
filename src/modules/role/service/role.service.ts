@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Role } from '../model/role.schema';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { RoleDto } from '../model/role.dto';
 import { RoleCategory } from '../../role-category/model/role-category.schema';
 import { RoleCategoryService } from '../../role-category/service/role-category.service';
@@ -25,9 +25,9 @@ export class RoleService {
       if (!(error instanceof NotFoundException)) {
         throw error;
       }
-      roleCategory = await this.roleCategoryService.addRoleCategory(
-        new RoleCategoryDto(categoryName),
-      );
+      roleCategory = await this.roleCategoryService.addRoleCategory({
+        name: categoryName,
+      });
     }
     const role = new this.roleModel({
       name: roleDto.name,
@@ -48,25 +48,8 @@ export class RoleService {
     }
 
     return roles.map(
-      (it) => new RoleDto(it.name, new RoleCategoryDto(category.name)),
+      (it) => new RoleDto(it.name, new RoleCategoryDto(category)),
     );
-  }
-
-  async findIdByName(name: string): Promise<Types.ObjectId> {
-    const role = await this.roleModel.findOne({ name });
-    if (!role) throw new NotFoundException('Role not found for the given name');
-
-    return role._id as Types.ObjectId;
-  }
-
-  async findDtoByName(name: string): Promise<RoleDto> {
-    const role = await this.roleModel.findOne({ name });
-    if (!role) throw new NotFoundException('RoleDto not found');
-    const category = await this.roleCategoryService.findById(
-      role.roleCategoryId.toString(),
-    );
-
-    return new RoleDto(role.name, new RoleCategoryDto(category.name));
   }
 
   async findDtoById(_id: string): Promise<RoleDto> {
@@ -76,6 +59,6 @@ export class RoleService {
       role.roleCategoryId.toString(),
     );
 
-    return new RoleDto(role.name, new RoleCategoryDto(category.name));
+    return new RoleDto(role.name, new RoleCategoryDto(category));
   }
 }

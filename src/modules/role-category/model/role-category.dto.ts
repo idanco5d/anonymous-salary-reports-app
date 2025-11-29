@@ -1,8 +1,9 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import { RoleCategory } from './role-category.schema';
 
 export class RoleCategoryDto {
-  constructor(name: string) {
-    this.name = name;
+  constructor(roleCategory: RoleCategory) {
+    this.name = roleCategory.name;
   }
 
   @IsString()

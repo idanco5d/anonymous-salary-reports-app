@@ -49,7 +49,7 @@ describe('Role Service', () => {
   afterAll(async () => closeAndStopDatabase(mongoConnection, dbInstance));
 
   it('should save role', async () => {
-    const dto = new RoleDto('test role', new RoleCategoryDto('test category'));
+    const dto = new RoleDto('test role', { name: 'test category' });
     const result = await service.addRole(dto);
 
     expect(result.name).toEqual('test role');
@@ -90,7 +90,7 @@ describe('Role Service', () => {
     expect(rolesFetched.length).toEqual(2);
     [roleA, roleB].forEach((role) => {
       expect(rolesFetched).toContainEqual(
-        new RoleDto(role.name, new RoleCategoryDto(category.name)),
+        new RoleDto(role.name, new RoleCategoryDto(category)),
       );
     });
   });

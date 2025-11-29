@@ -25,7 +25,7 @@ export class RoleCategoryService {
 
   async findAll(): Promise<RoleCategoryDto[]> {
     const roleCategories = await this.roleCategoryModel.find();
-    return roleCategories.map((it) => new RoleCategoryDto(it.name));
+    return roleCategories.map((it) => new RoleCategoryDto(it));
   }
 
   async findByName(name: string): Promise<RoleCategory> {
