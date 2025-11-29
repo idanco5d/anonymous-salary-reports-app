@@ -41,24 +41,23 @@ export class SalaryService {
       throw new NotFoundException('No salaries found');
     }
 
-    return salaries.map((salary) => {
-      return new SalaryDto(
-        (salary._id as Types.ObjectId).toString(),
-        salary.baseSalary,
-        salary.extras,
-        roleDto,
-        salary.experienceYears,
-        salary.education,
-        salary.educationInRelevantField,
-        salary.employerType,
-        salary.likedBy.length,
-        salary.dislikedBy.length,
-        false, // TODO change when auth is implemented
-        false,
-        salary.startYear,
-        salary.endYear,
-      );
-    });
+    return salaries.map((salary) => ({
+      id: (salary._id as Types.ObjectId).toString(),
+      baseSalary: salary.baseSalary,
+      extras: salary.extras,
+      roleDto: roleDto,
+      experienceYears: salary.experienceYears,
+      education: salary.education,
+      educationInRelevantField: salary.educationInRelevantField,
+      vacationDays: salary.vacationDays,
+      employerType: salary.employerType,
+      likes: salary.likedBy.length,
+      dislikes: salary.dislikedBy.length,
+      isLikedByCurrentUser: false, // TODO change when auth is implemented
+      isDislikedByCurrentUser: false,
+      startYear: salary.startYear,
+      endYear: salary.endYear,
+    }));
   }
 
   async toggleLike(salaryId: string, userId: string) {
@@ -80,7 +79,7 @@ export class SalaryService {
     }
     salary.lastUpdatedBy = 'SYSTEM'; // TODO change when auth is implemented
 
-    return await this.saveSalaryAndGetSalaryDto(salaryId, salary);
+    return await this.saveSalaryAndGetSalaryDto(salary);
   }
 
   async toggleDislike(salaryId: string, userId: string) {
@@ -102,33 +101,20 @@ export class SalaryService {
     }
     salary.lastUpdatedBy = 'SYSTEM'; // TODO change when auth is implemented
 
-    return await this.saveSalaryAndGetSalaryDto(salaryId, salary);
+    return await this.saveSalaryAndGetSalaryDto(salary);
   }
 
-  private async saveSalaryAndGetSalaryDto(
-    salaryId: string,
-    salary: Salary,
-  ): Promise<SalaryDto> {
+  private async saveSalaryAndGetSalaryDto(salary: Salary): Promise<SalaryDto> {
     await salary.save();
     const roleDto = await this.roleService.findDtoById(
       salary.roleId.toString(),
     );
 
     return new SalaryDto(
-      salaryId,
-      salary.baseSalary,
-      salary.extras,
-      roleDto,
-      salary.experienceYears,
-      salary.education,
-      salary.educationInRelevantField,
-      salary.employerType,
-      salary.likedBy.length,
-      salary.dislikedBy.length,
+      salary,
       false, // TODO change when auth is implemented
       false,
-      salary.startYear,
-      salary.endYear,
+      roleDto,
     );
   }
 }

@@ -47,9 +47,7 @@ export class RoleService {
       throw new NotFoundException('Role not found');
     }
 
-    return roles.map(
-      (it) => new RoleDto(it.name, new RoleCategoryDto(category)),
-    );
+    return roles.map((it) => new RoleDto(it, new RoleCategoryDto(category)));
   }
 
   async findDtoById(_id: string): Promise<RoleDto> {
@@ -59,6 +57,6 @@ export class RoleService {
       role.roleCategoryId.toString(),
     );
 
-    return new RoleDto(role.name, new RoleCategoryDto(category));
+    return new RoleDto(role, new RoleCategoryDto(category));
   }
 }

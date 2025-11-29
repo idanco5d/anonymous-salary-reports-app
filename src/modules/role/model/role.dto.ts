@@ -1,9 +1,10 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { RoleCategoryDto } from '../../role-category/model/role-category.dto';
+import { Role } from './role.schema';
 
 export class RoleDto {
-  constructor(name: string, roleCategoryDto: RoleCategoryDto) {
-    this.name = name;
+  constructor(role: Role, roleCategoryDto: RoleCategoryDto) {
+    this.name = role.name;
     this.roleCategory = roleCategoryDto;
   }
 

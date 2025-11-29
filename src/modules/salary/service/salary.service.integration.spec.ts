@@ -15,6 +15,8 @@ import { getModelToken } from '@nestjs/mongoose';
 import { RoleCategory } from '../../role-category/model/role-category.schema';
 import { Education } from '../model/education';
 import { EmployerType } from '../model/employerType';
+import { SalaryDto } from '../model/salary.dto';
+import { RoleDto } from '../../role/model/role.dto';
 
 describe('Salary Service', () => {
   let service: SalaryService;
@@ -125,8 +127,13 @@ describe('Salary Service', () => {
         (it) => it._id == foundSalary.id,
       )!;
 
-      Object.keys(foundSalary).forEach((key) =>
-        expect(foundSalary[key]).toEqual(matchingSalaryDoc[key]),
+      expect(foundSalary).toEqual(
+        new SalaryDto(
+          matchingSalaryDoc,
+          false,
+          false,
+          new RoleDto(role, { name: 'category name' }),
+        ),
       );
     });
   });

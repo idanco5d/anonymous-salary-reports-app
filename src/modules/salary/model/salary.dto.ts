@@ -1,8 +1,8 @@
-import { Education } from './education';
-import { EmployerType } from './employerType';
 import { RoleDto } from '../../role/model/role.dto';
 import { BaseSalaryDto } from './base-salary.dto';
 import { IsMongoId, Min } from 'class-validator';
+import { Salary } from './salary.schema';
+import { Types } from 'mongoose';
 
 export class SalaryDto extends BaseSalaryDto {
   @IsMongoId()
@@ -21,37 +21,26 @@ export class SalaryDto extends BaseSalaryDto {
   isDislikedByCurrentUser: boolean;
 
   constructor(
-    id: string,
-    baseSalary: number,
-    extras: number,
-    roleDto: RoleDto,
-    experienceYears: number,
-    education: Education,
-    educationInRelevantField: boolean,
-    employerType: EmployerType,
-    likes: number,
-    dislikes: number,
+    salary: Salary,
     isLikedByCurrentUser: boolean,
     isDislikedByCurrentUser: boolean,
-    vacationDays?: number,
-    startYear?: number,
-    endYear?: number,
+    roleDto: RoleDto,
   ) {
     super();
-    this.id = id;
-    this.baseSalary = baseSalary;
-    this.extras = extras;
-    this.experienceYears = experienceYears;
-    this.education = education;
-    this.educationInRelevantField = educationInRelevantField;
-    this.vacationDays = vacationDays;
-    this.employerType = employerType;
-    this.likes = likes;
-    this.dislikes = dislikes;
+    this.id = (salary._id as Types.ObjectId).toString();
+    this.baseSalary = salary.baseSalary;
+    this.extras = salary.extras;
+    this.experienceYears = salary.experienceYears;
+    this.education = salary.education;
+    this.educationInRelevantField = salary.educationInRelevantField;
+    this.vacationDays = salary.vacationDays;
+    this.employerType = salary.employerType;
+    this.likes = salary.likedBy.length;
+    this.dislikes = salary.dislikedBy.length;
     this.isLikedByCurrentUser = isLikedByCurrentUser;
     this.isDislikedByCurrentUser = isDislikedByCurrentUser;
-    this.startYear = startYear;
-    this.endYear = endYear;
+    this.startYear = salary.startYear;
+    this.endYear = salary.endYear;
     this.roleDto = roleDto;
   }
 }
