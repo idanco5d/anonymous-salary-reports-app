@@ -44,6 +44,11 @@ describe('Role E2E test', () => {
       .get(`/role/category/${roleCategoryId.toString()}`)
       .expect(200);
 
-    expect((getRoleResponse.body as RoleDto[])[0]).toEqual(roleDto);
+    expect((getRoleResponse.body as RoleDto[])[0]).toEqual(
+      new RoleDto(addedRole, {
+        id: roleCategoryId.toString(),
+        name: 'test category',
+      }),
+    );
   });
 });

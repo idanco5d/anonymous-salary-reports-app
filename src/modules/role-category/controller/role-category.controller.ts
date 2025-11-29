@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { RoleCategoryService } from '../service/role-category.service';
 import { RoleCategoryDto } from '../model/role-category.dto';
+import { RoleCategory } from '../model/role-category.schema';
 
 @Controller('role-category')
 export class RoleCategoryController {
@@ -9,7 +10,7 @@ export class RoleCategoryController {
   @Post()
   async addRoleCategory(
     @Body() roleCategoryDto: RoleCategoryDto,
-  ): Promise<RoleCategoryDto> {
+  ): Promise<RoleCategory> {
     return this.roleCategoryService.addRoleCategory(roleCategoryDto);
   }
 

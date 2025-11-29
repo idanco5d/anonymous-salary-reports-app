@@ -17,17 +17,18 @@ export class RoleService {
   ) {}
 
   async addRole(roleDto: RoleDto): Promise<Role> {
-    const categoryName = roleDto.roleCategory.name;
     let roleCategory: RoleCategory;
     try {
-      roleCategory = await this.roleCategoryService.findByName(categoryName);
+      roleCategory = await this.roleCategoryService.findById(
+        roleDto.roleCategory.id,
+      );
     } catch (error) {
       if (!(error instanceof NotFoundException)) {
         throw error;
       }
-      roleCategory = await this.roleCategoryService.addRoleCategory({
-        name: categoryName,
-      });
+      roleCategory = await this.roleCategoryService.addRoleCategory(
+        roleDto.roleCategory,
+      );
     }
     const role = new this.roleModel({
       name: roleDto.name,

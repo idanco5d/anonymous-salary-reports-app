@@ -17,6 +17,7 @@ import { Education } from '../model/education';
 import { EmployerType } from '../model/employerType';
 import { SalaryDto } from '../model/salary.dto';
 import { RoleDto } from '../../role/model/role.dto';
+import { RoleCategoryDto } from '../../role-category/model/role-category.dto';
 
 describe('Salary Service', () => {
   let service: SalaryService;
@@ -48,23 +49,25 @@ describe('Salary Service', () => {
 
   afterAll(async () => closeAndStopDatabase(mongoConnection, dbInstance));
 
-  async function createCategoryAndRole(): Promise<Role> {
+  async function createCategoryAndRole() {
     const roleCategory = await new roleCategoryModel({
       name: 'category name',
       lastUpdatedBy: 'SYSTEM',
       createdBy: 'SYSTEM',
     }).save();
 
-    return await new roleModel({
+    const role = await new roleModel({
       name: 'role name',
       roleCategoryId: roleCategory._id,
       lastUpdatedBy: 'SYSTEM',
       createdBy: 'SYSTEM',
     }).save();
+
+    return { role, roleCategory };
   }
 
   it('should create salary', async () => {
-    const role = await createCategoryAndRole();
+    const { role } = await createCategoryAndRole();
 
     const dto: CreateSalaryDto = {
       roleId: (role._id as Types.ObjectId).toString(),
@@ -90,7 +93,7 @@ describe('Salary Service', () => {
   });
 
   it('should get all by role', async () => {
-    const role = await createCategoryAndRole();
+    const { role, roleCategory } = await createCategoryAndRole();
     const roleId = (role._id as Types.ObjectId).toString();
     const salaryA = await new salaryModel({
       roleId,
@@ -132,14 +135,14 @@ describe('Salary Service', () => {
           matchingSalaryDoc,
           false,
           false,
-          new RoleDto(role, { name: 'category name' }),
+          new RoleDto(role, new RoleCategoryDto(roleCategory)),
         ),
       );
     });
   });
 
   it('should like a salary and then remove like', async () => {
-    const role = await createCategoryAndRole();
+    const { role } = await createCategoryAndRole();
     const roleId = (role._id as Types.ObjectId).toString();
     const salary = await new salaryModel({
       roleId,
@@ -171,7 +174,7 @@ describe('Salary Service', () => {
   });
 
   it('should dislike a salary and then remove dislike', async () => {
-    const role = await createCategoryAndRole();
+    const { role } = await createCategoryAndRole();
     const roleId = (role._id as Types.ObjectId).toString();
     const salary = await new salaryModel({
       roleId,
