@@ -12,11 +12,11 @@ export class AuthService {
   ) {}
 
   async handleOAuthLogin(oauthProfile: {
-    sub: string;
+    oauthId: string;
     provider: OauthProvider;
   }) {
     const user = await this.userService.findOrCreateByOAuthId(
-      oauthProfile.sub,
+      oauthProfile.oauthId,
       oauthProfile.provider,
     );
     const payload = {
