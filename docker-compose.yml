@@ -11,10 +11,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: salary-db
     volumes:
       - mongodb_data:/data/db
     networks:
-      - app-network
+      - salary-network
 
   mongo-express:
     image: mongo-express:latest
@@ -31,44 +32,12 @@ services:
     depends_on:
       - mongodb
     networks:
-      - app-network
-
-  salary-service:
-    build: ./services/salary-service
-    container_name: salary-service
-    ports:
-      - '3000:3000'
-    environment:
-      MONGODB_URI: mongodb://root:password@mongodb:27017/salary-db?authSource=admin
-      PORT: 3000
-    depends_on:
-      - mongodb
-    networks:
-      - app-network
-    volumes:
-      - ./services/salary-service:/app
-      - /app/node_modules
-
-  auth-service:
-    build: ./services/auth-service
-    container_name: auth-service
-    ports:
-      - '3001:3001'
-    environment:
-      MONGODB_URI: mongodb://root:password@mongodb:27017/auth-db?authSource=admin
-      PORT: 3001
-      JWT_SECRET: your-secret-key-change-this
-    depends_on:
-      - mongodb
-    networks:
-      - app-network
-    volumes:
-      - ./services/auth-service:/app
-      - /app/node_modules
+      - salary-network
 
 volumes:
   mongodb_data:
+    driver: local
 
 networks:
-  app-network:
+  salary-network:
     driver: bridge
