@@ -16,22 +16,23 @@ export class RoleService {
     private roleModel: Model<Role>,
   ) {}
 
-  async addRole(roleDto: RoleDto): Promise<Role> {
+  async create(roleDto: RoleDto, userId: string): Promise<Role> {
     let roleCategory: RoleCategory;
     if (roleDto.roleCategory.id !== undefined) {
       roleCategory = await this.roleCategoryService.findById(
         roleDto.roleCategory.id.toString(),
       );
     } else {
-      roleCategory = await this.roleCategoryService.addRoleCategory(
+      roleCategory = await this.roleCategoryService.create(
         roleDto.roleCategory,
+        userId,
       );
     }
     const role = new this.roleModel({
       name: roleDto.name,
       roleCategoryId: roleCategory._id,
-      lastUpdatedBy: 'SYSTEM', //TODO switch to current user when auth service is implemented
-      createdBy: 'SYSTEM',
+      lastUpdatedBy: userId,
+      createdBy: userId,
     });
 
     return await role.save();

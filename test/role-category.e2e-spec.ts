@@ -3,21 +3,22 @@ import {
   afterE2eTest,
   cleanupTestData,
   configureE2eTest,
+  getAuthenticatedRequest,
+  postAuthenticatedRequest,
   TestDatabaseInstance,
 } from '../test-utils/database.helper';
 import { Connection } from 'mongoose';
 import { RoleCategoryModule } from '../src/modules/role-category/role-category.module';
 import { RoleCategoryDto } from '../src/modules/role-category/model/role-category.dto';
-import request from 'supertest';
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 describe('Role Category E2E test', () => {
   let app: INestApplication;
   let dbInstance: TestDatabaseInstance;
   let mongoConnection: Connection;
+  let accessToken: string;
 
   beforeAll(async () => {
-    ({ app, dbInstance, mongoConnection } =
+    ({ app, dbInstance, mongoConnection, accessToken } =
       await configureE2eTest(RoleCategoryModule));
   });
 
@@ -28,10 +29,12 @@ describe('Role Category E2E test', () => {
   it('should add a role category', async () => {
     const dto: RoleCategoryDto = { name: 'test' };
 
-    const response = await request(app.getHttpServer())
-      .post('/role-category')
-      .send(dto)
-      .expect(201);
+    const response = await postAuthenticatedRequest(
+      app,
+      '/role-category',
+      accessToken,
+      dto,
+    );
 
     expect((response.body as RoleCategoryDto).name).toEqual('test');
   });
@@ -41,15 +44,14 @@ describe('Role Category E2E test', () => {
     const dto2: RoleCategoryDto = { name: 'test2' };
 
     for (const dto of [dto1, dto2]) {
-      await request(app.getHttpServer())
-        .post('/role-category')
-        .send(dto)
-        .expect(201);
+      await postAuthenticatedRequest(app, '/role-category', accessToken, dto);
     }
 
-    const response = await request(app.getHttpServer())
-      .get('/role-category')
-      .expect(200);
+    const response = await getAuthenticatedRequest(
+      app,
+      '/role-category',
+      accessToken,
+    );
 
     const responseDtoList = response.body as RoleCategoryDto[];
     expect(responseDtoList).toHaveLength(2);

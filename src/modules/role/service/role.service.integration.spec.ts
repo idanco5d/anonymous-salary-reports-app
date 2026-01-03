@@ -48,12 +48,13 @@ describe('Role Service', () => {
 
   afterAll(async () => closeAndStopDatabase(mongoConnection, dbInstance));
 
-  it('should save role', async () => {
+  it('should create role', async () => {
     const dto: RoleDto = {
       name: 'test role',
       roleCategory: { name: 'test category' },
     };
-    const result = await service.addRole(dto);
+    const userId = 'TEST_USER';
+    const result = await service.create(dto, userId);
 
     expect(result.name).toEqual('test role');
     expect(result.roleCategoryId).toBeDefined();
@@ -61,6 +62,8 @@ describe('Role Service', () => {
     const persisted = await roleModel.find();
     expect(persisted.length).toEqual(1);
     expect(persisted[0].name).toEqual('test role');
+    expect(persisted[0].createdBy).toEqual(userId);
+    expect(persisted[0].lastUpdatedBy).toEqual(userId);
   });
 
   it('should get all by category id', async () => {

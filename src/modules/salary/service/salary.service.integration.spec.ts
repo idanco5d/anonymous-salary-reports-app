@@ -81,7 +81,7 @@ describe('Salary Service', () => {
       experienceYears: 10,
     };
 
-    const addResponse = await service.create(dto);
+    const addResponse = await service.create(dto, 'TEST_USER');
     const allPersistedSalaries = await salaryModel.find();
     expect(allPersistedSalaries.length).toEqual(1);
     const persistedSalary = allPersistedSalaries[0];
@@ -95,6 +95,7 @@ describe('Salary Service', () => {
   it('should get all by role', async () => {
     const { role, roleCategory } = await createCategoryAndRole();
     const roleId = (role._id as Types.ObjectId).toString();
+    const userId = '69593c956722bb7c730caf63';
     const salaryA = await new salaryModel({
       roleId,
       baseSalary: 30000,
@@ -107,6 +108,7 @@ describe('Salary Service', () => {
       experienceYears: 10,
       createdBy: 'SYSTEM',
       lastUpdatedBy: 'SYSTEM',
+      likedBy: [new Types.ObjectId(userId)],
     }).save();
     const salaryB = await new salaryModel({
       roleId,
@@ -120,9 +122,10 @@ describe('Salary Service', () => {
       experienceYears: 5,
       createdBy: 'SYSTEM',
       lastUpdatedBy: 'SYSTEM',
+      dislikedBy: [new Types.ObjectId(userId)],
     }).save();
 
-    const result = await service.getAllByRoleId(roleId);
+    const result = await service.getAllByRoleId(roleId, userId);
 
     expect(result.length).toEqual(2);
     result.forEach((foundSalary) => {
@@ -133,8 +136,8 @@ describe('Salary Service', () => {
       expect(foundSalary).toEqual(
         new SalaryDto(
           matchingSalaryDoc,
-          false,
-          false,
+          foundSalary.id === (salaryA._id as Types.ObjectId).toString(),
+          foundSalary.id === (salaryB._id as Types.ObjectId).toString(),
           new RoleDto(role, new RoleCategoryDto(roleCategory)),
         ),
       );
@@ -158,7 +161,7 @@ describe('Salary Service', () => {
       lastUpdatedBy: 'SYSTEM',
     }).save();
 
-    const userId = roleId; // TODO change to actual userId when auth service implemented
+    const userId = '69593c956722bb7c730caf63';
     await service.toggleLike((salary._id as Types.ObjectId).toString(), userId);
 
     const likedSalary = await salaryModel.find();

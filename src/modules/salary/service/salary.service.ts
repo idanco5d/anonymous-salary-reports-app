@@ -15,7 +15,10 @@ export class SalaryService {
     private salaryModel: Model<Salary>,
   ) {}
 
-  async create(createSalaryDto: CreateSalaryDto): Promise<Salary> {
+  async create(
+    createSalaryDto: CreateSalaryDto,
+    userId: string,
+  ): Promise<Salary> {
     return await new this.salaryModel({
       baseSalary: createSalaryDto.baseSalary,
       extras: createSalaryDto.extras,
@@ -29,12 +32,12 @@ export class SalaryService {
       dislikedBy: [],
       startYear: createSalaryDto.startYear,
       endYear: createSalaryDto.endYear,
-      createdBy: 'SYSTEM', //TODO switch to current user when auth service is implemented
-      lastUpdatedBy: 'SYSTEM',
+      createdBy: userId,
+      lastUpdatedBy: userId,
     }).save();
   }
 
-  async getAllByRoleId(roleId: string): Promise<SalaryDto[]> {
+  async getAllByRoleId(roleId: string, userId: string): Promise<SalaryDto[]> {
     const roleDto = await this.roleService.findDtoById(roleId);
     const salaries = await this.salaryModel.find({ roleId });
     if (salaries.length === 0) {
@@ -53,8 +56,12 @@ export class SalaryService {
       employerType: salary.employerType,
       likes: salary.likedBy.length,
       dislikes: salary.dislikedBy.length,
-      isLikedByCurrentUser: false, // TODO change when auth is implemented
-      isDislikedByCurrentUser: false,
+      isLikedByCurrentUser: salary.likedBy.some(
+        (it) => it.toString() == userId,
+      ),
+      isDislikedByCurrentUser: salary.dislikedBy.some(
+        (it) => it.toString() == userId,
+      ),
       startYear: salary.startYear,
       endYear: salary.endYear,
     }));
@@ -77,9 +84,9 @@ export class SalaryService {
         (id) => id.toString() !== userId,
       );
     }
-    salary.lastUpdatedBy = 'SYSTEM'; // TODO change when auth is implemented
+    salary.lastUpdatedBy = userId;
 
-    return await this.saveSalaryAndGetSalaryDto(salary);
+    return await this.saveSalaryAndGetSalaryDto(salary, userId);
   }
 
   async toggleDislike(salaryId: string, userId: string) {
@@ -99,12 +106,15 @@ export class SalaryService {
       salary.dislikedBy.push(userObjectId);
       salary.likedBy = salary.likedBy.filter((id) => id.toString() !== userId);
     }
-    salary.lastUpdatedBy = 'SYSTEM'; // TODO change when auth is implemented
+    salary.lastUpdatedBy = userId;
 
-    return await this.saveSalaryAndGetSalaryDto(salary);
+    return await this.saveSalaryAndGetSalaryDto(salary, userId);
   }
 
-  private async saveSalaryAndGetSalaryDto(salary: Salary): Promise<SalaryDto> {
+  private async saveSalaryAndGetSalaryDto(
+    salary: Salary,
+    userId: string,
+  ): Promise<SalaryDto> {
     await salary.save();
     const roleDto = await this.roleService.findDtoById(
       salary.roleId.toString(),
@@ -112,8 +122,8 @@ export class SalaryService {
 
     return new SalaryDto(
       salary,
-      false, // TODO change when auth is implemented
-      false,
+      salary.likedBy.some((it) => it._id.toString() == userId),
+      salary.dislikedBy.some((it) => it._id.toString() == userId),
       roleDto,
     );
   }

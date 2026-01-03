@@ -11,13 +11,14 @@ export class RoleCategoryService {
     private roleCategoryModel: Model<RoleCategory>,
   ) {}
 
-  async addRoleCategory(
+  async create(
     roleCategoryDto: RoleCategoryDto,
+    userId: string,
   ): Promise<RoleCategory> {
     const roleCategory = new this.roleCategoryModel({
       name: roleCategoryDto.name,
-      lastUpdatedBy: 'SYSTEM', //TODO switch to current user when auth service is implemented
-      createdBy: 'SYSTEM',
+      lastUpdatedBy: userId,
+      createdBy: userId,
     });
 
     return await roleCategory.save();

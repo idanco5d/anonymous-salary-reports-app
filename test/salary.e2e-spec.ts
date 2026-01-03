@@ -3,6 +3,8 @@ import {
   afterE2eTest,
   cleanupTestData,
   configureE2eTest,
+  getAuthenticatedRequest,
+  postAuthenticatedRequest,
   TestDatabaseInstance,
 } from '../test-utils/database.helper';
 import { Connection, Types } from 'mongoose';
@@ -11,19 +13,19 @@ import { CreateSalaryDto } from '../src/modules/salary/model/create-salary.dto';
 import { Education } from '../src/modules/salary/model/education';
 import { EmployerType } from '../src/modules/salary/model/employerType';
 import { RoleDto } from '../src/modules/role/model/role.dto';
-import request, { Response } from 'supertest';
+import { Response } from 'supertest';
 import { Role } from '../src/modules/role/model/role.schema';
 import { Salary } from '../src/modules/salary/model/salary.schema';
 import { SalaryDto } from '../src/modules/salary/model/salary.dto';
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 describe('Salary E2E test', () => {
   let app: INestApplication;
   let dbInstance: TestDatabaseInstance;
   let mongoConnection: Connection;
+  let accessToken: string;
 
   beforeAll(async () => {
-    ({ app, dbInstance, mongoConnection } =
+    ({ app, dbInstance, mongoConnection, accessToken } =
       await configureE2eTest(SalaryModule));
   });
 
@@ -43,46 +45,48 @@ describe('Salary E2E test', () => {
   });
 
   it('should like a salary and then unlike it', async () => {
-    const { roleId, createSalaryResponse } = await createRoleAndSalary();
+    const { createSalaryResponse } = await createRoleAndSalary();
     const salaryId = (createSalaryResponse.body as Salary)
       ._id as Types.ObjectId;
-    const userId = roleId.toString(); // TODO change to userId when auth is implemented
 
-    const toggleLikeResponse = await request(app.getHttpServer())
-      .post(`/salary/toggle-like/salary/${salaryId.toString()}/user/${userId}`)
-      .expect(201);
+    const toggleLikeResponse = await postAuthenticatedRequest(
+      app,
+      `/salary/toggle-like/salary/${salaryId.toString()}`,
+      accessToken,
+    );
 
     const toggleLikeSalaryDto = toggleLikeResponse.body as SalaryDto;
     expect(toggleLikeSalaryDto.likes).toEqual(1);
 
-    const toggleUnlikeResponse = await request(app.getHttpServer())
-      .post(`/salary/toggle-like/salary/${salaryId.toString()}/user/${userId}`)
-      .expect(201);
+    const toggleUnlikeResponse = await postAuthenticatedRequest(
+      app,
+      `/salary/toggle-like/salary/${salaryId.toString()}`,
+      accessToken,
+    );
 
     const toggleUnlikeSalaryDto = toggleUnlikeResponse.body as SalaryDto;
     expect(toggleUnlikeSalaryDto.likes).toEqual(0);
   });
 
   it('should dislike a salary and then un-dislike it', async () => {
-    const { roleId, createSalaryResponse } = await createRoleAndSalary();
+    const { createSalaryResponse } = await createRoleAndSalary();
     const salaryId = (createSalaryResponse.body as Salary)
       ._id as Types.ObjectId;
-    const userId = roleId.toString(); // TODO change to userId when auth is implemented
 
-    const toggleDislikeResponse = await request(app.getHttpServer())
-      .post(
-        `/salary/toggle-dislike/salary/${salaryId.toString()}/user/${userId}`,
-      )
-      .expect(201);
+    const toggleDislikeResponse = await postAuthenticatedRequest(
+      app,
+      `/salary/toggle-dislike/salary/${salaryId.toString()}`,
+      accessToken,
+    );
 
     const toggleDislikeSalaryDto = toggleDislikeResponse.body as SalaryDto;
     expect(toggleDislikeSalaryDto.dislikes).toEqual(1);
 
-    const toggleUnDislikeResponse = await request(app.getHttpServer())
-      .post(
-        `/salary/toggle-dislike/salary/${salaryId.toString()}/user/${userId}`,
-      )
-      .expect(201);
+    const toggleUnDislikeResponse = await postAuthenticatedRequest(
+      app,
+      `/salary/toggle-dislike/salary/${salaryId.toString()}`,
+      accessToken,
+    );
 
     const toggleUnDislikeSalaryDto = toggleUnDislikeResponse.body as SalaryDto;
     expect(toggleUnDislikeSalaryDto.dislikes).toEqual(0);
@@ -103,15 +107,19 @@ describe('Salary E2E test', () => {
       endYear: 2024,
       experienceYears: 7,
     };
-    const anotherCreateSalaryResponse = await request(app.getHttpServer())
-      .post('/salary/create')
-      .send(anotherCreateSalaryDto)
-      .expect(201);
+    const anotherCreateSalaryResponse = await postAuthenticatedRequest(
+      app,
+      '/salary/create',
+      accessToken,
+      anotherCreateSalaryDto,
+    );
 
-    const getAllResponse = await request(app.getHttpServer())
-      .get(`/salary/get-all-by-role/${roleId.toString()}`)
-      .send(roleDto)
-      .expect(200);
+    const getAllResponse = await getAuthenticatedRequest(
+      app,
+      `/salary/get-all-by-role/${roleId.toString()}`,
+      accessToken,
+      roleDto,
+    );
 
     expect(getAllResponse.body).toHaveLength(2);
     compareSalaryResponseToSentDto(
@@ -131,10 +139,12 @@ describe('Salary E2E test', () => {
       name: 'test role',
       roleCategory: { name: 'test category' },
     };
-    const addRoleResponse = await request(app.getHttpServer())
-      .post('/role')
-      .send(roleDto)
-      .expect(201);
+    const addRoleResponse = await postAuthenticatedRequest(
+      app,
+      '/role',
+      accessToken,
+      roleDto,
+    );
     const roleId = (addRoleResponse.body as Role)._id as Types.ObjectId;
     const createSalaryDto: CreateSalaryDto = {
       roleId: roleId.toString(),
@@ -148,10 +158,12 @@ describe('Salary E2E test', () => {
       experienceYears: 10,
     };
 
-    const createSalaryResponse = await request(app.getHttpServer())
-      .post('/salary/create')
-      .send(createSalaryDto)
-      .expect(201);
+    const createSalaryResponse = await postAuthenticatedRequest(
+      app,
+      '/salary/create',
+      accessToken,
+      createSalaryDto,
+    );
     return { roleId, createSalaryDto, createSalaryResponse, roleDto };
   }
 
