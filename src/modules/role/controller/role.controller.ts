@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { RoleDto } from '../model/role.dto';
+import { CreateRoleDto, RoleDto } from '../model/role.dto';
 import { RoleService } from '../service/role.service';
 import { Role } from '../model/role.schema';
 import { CurrentUserId } from '../../../auth/decorators/current-user-id.decorator';
@@ -10,7 +10,7 @@ export class RoleController {
 
   @Post()
   async addRole(
-    @Body() roleDto: RoleDto,
+    @Body() roleDto: CreateRoleDto,
     @CurrentUserId() userId: string,
   ): Promise<Role> {
     return this.roleService.create(roleDto, userId);

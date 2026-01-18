@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Role } from '../model/role.schema';
 import { Model } from 'mongoose';
-import { RoleDto } from '../model/role.dto';
+import { CreateRoleDto, RoleDto } from '../model/role.dto';
 import { RoleCategory } from '../../role-category/model/role-category.schema';
 import { RoleCategoryService } from '../../role-category/service/role-category.service';
 import { RoleCategoryDto } from '../../role-category/model/role-category.dto';
@@ -16,7 +16,7 @@ export class RoleService {
     private roleModel: Model<Role>,
   ) {}
 
-  async create(roleDto: RoleDto, userId: string): Promise<Role> {
+  async create(roleDto: CreateRoleDto, userId: string): Promise<Role> {
     let roleCategory: RoleCategory;
     if (roleDto.roleCategory.id !== undefined) {
       roleCategory = await this.roleCategoryService.findById(

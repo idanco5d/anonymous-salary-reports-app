@@ -1,4 +1,4 @@
-import { Max, Min } from 'class-validator';
+import { IsOptional, Max, Min } from 'class-validator';
 import { Education } from './education';
 import { EmployerType } from './employerType';
 
@@ -21,10 +21,12 @@ export class BaseSalaryDto {
   @Min(12, { message: 'Minimum vacation days in Israel are 12' })
   vacationDays?: number;
 
+  @IsOptional()
   @Min(1940, { message: 'Start year cannot be too far in the past' })
   @Max(new Date().getFullYear(), { message: 'Year cannot be in the future' })
   startYear?: number;
 
+  @IsOptional()
   @Min(1940, { message: 'End year cannot be too far in the past' })
   @Max(new Date().getFullYear(), { message: 'Year cannot be in the future' })
   endYear?: number;

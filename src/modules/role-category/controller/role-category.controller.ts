@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { RoleCategoryService } from '../service/role-category.service';
-import { RoleCategoryDto } from '../model/role-category.dto';
+import {
+  CreateRoleCategoryDto,
+  RoleCategoryDto,
+} from '../model/role-category.dto';
 import { RoleCategory } from '../model/role-category.schema';
 import { CurrentUserId } from '../../../auth/decorators/current-user-id.decorator';
 
@@ -10,7 +13,7 @@ export class RoleCategoryController {
 
   @Post()
   async addRoleCategory(
-    @Body() roleCategoryDto: RoleCategoryDto,
+    @Body() roleCategoryDto: CreateRoleCategoryDto,
     @CurrentUserId() userId: string,
   ): Promise<RoleCategory> {
     return this.roleCategoryService.create(roleCategoryDto, userId);
