@@ -16,6 +16,7 @@ import * as path from 'path';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
+import { UserRole } from '../src/auth/model/user-role.enum';
 
 let mongoDb: MongoMemoryServer | null = null;
 
@@ -80,7 +81,7 @@ export async function configureE2eTest<T>(moduleClass: Type<T>) {
   const jwtService = moduleFixture.get<JwtService>(JwtService);
   const configService = moduleFixture.get<ConfigService>(ConfigService);
   const accessToken = jwtService.sign(
-    { userId: '695939e556ed7d7e021f5f8b' },
+    { userId: '695939e556ed7d7e021f5f8b', role: UserRole.ADMIN },
     { secret: configService.get<string>('JWT_ACCESS_SECRET'), expiresIn: '2m' },
   );
 
